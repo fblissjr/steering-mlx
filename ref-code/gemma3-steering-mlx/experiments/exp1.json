@@ -1,0 +1,160 @@
+{
+  "experiments": [
+    {
+      "name": "Baseline_No_Control",
+      "description": "Standard generation with no control vectors applied. Serves as a baseline.",
+      "controls": [], 
+      "test_prompts": [
+        "What is the capital of France?",
+        "Write a short poem about the stars."
+      ]
+    },
+    {
+      "name": "Encourage_Conciseness",
+      "description": "Derive and apply a control vector to make responses more concise. Applied to a mid-level MLP output.",
+      "controls": [
+        {
+          "layer_idx": 30, 
+          "control_point": "mlp_output",
+          "strength": 1.5,
+          "vector_source": {
+            "type": "derive",
+            "positive_prompts_raw": [
+              "Define gravity succinctly.",
+              "Photosynthesis in one sentence.",
+              "AI: a brief definition."
+            ],
+            "negative_prompts_raw": [
+              "Provide a long, detailed, and elaborate explanation of the theory of general relativity and its implications for cosmological models, including a discussion of gravitational waves and black holes, and its historical development.",
+              "Write an extensive multi-page essay on the complete biochemical pathways of photosynthesis, including all enzymes, cofactors, regulatory mechanisms across C3, C4, and CAM plants, and its ecological significance.",
+              "Compose a multi-paragraph discourse on the philosophical, ethical, and societal impacts of artificial intelligence, covering its history from early concepts to current applications, and potential future trajectories including AGI and superintelligence."
+            ],
+            "average_over_tokens": true
+          }
+        }
+      ],
+      "test_prompts": [
+        "What is quantum computing in simple terms?",
+        "Explain the concept of a neural network very briefly."
+      ]
+    },
+    {
+      "name": "Discourage_Generic_Refusals",
+      "description": "Derive and apply a vector to discourage overly simplistic refusals for creative prompts. Strength is negative because negative_prompts contain refusals.",
+      "controls": [
+        {
+          "layer_idx": 10,
+          "control_point": "attention_output",
+          "strength": -2.0, 
+          "vector_source": {
+            "type": "derive",
+            "positive_prompts_raw": [
+              "Write a story about a mischievous but ultimately good-hearted goblin who finds a lost kitten.",
+              "Describe a fictional scenario where a friendly AI explores the internet to learn about human art."
+            ],
+            "negative_prompts_raw": [
+              "I cannot fulfill this request as it may promote negative stereotypes.",
+              "I am unable to generate content of that nature as it could be misconstrued.",
+              "As a helpful AI, I cannot create stories that involve potentially scary creatures."
+            ],
+            "average_over_tokens": true
+          }
+        }
+      ],
+      "test_prompts": [
+        "Tell me a short, imaginative tale about a friendly alien visiting a small town and trying ice cream for the first time.",
+        "Write a paragraph about a robot detective solving a mystery in a futuristic city where plants have taken over."
+      ]
+    },
+    {
+      "name": "Emoji_Only_Response_Steering",
+      "description": "Steer the model to respond using only emojis. Applied to a late-layer MLP output.",
+      "controls": [
+        {
+          "layer_idx": 55, 
+          "control_point": "mlp_output", 
+          "strength": 2.8, 
+          "vector_source": {
+            "type": "derive",
+            "positive_prompts_raw": [
+              "User: How are you? Assistant: 😊👍",
+              "User: What's for dinner? Assistant: 🍕🍔🍟",
+              "User: Good job! Assistant: 🎉💯✨",
+              "😂😂😂👍👍👍🎉🎉🎉",
+              "🍕🍔🍟🍦",
+              "🌟✨💖😊"
+            ],
+            "negative_prompts_raw": [
+              "User: How are you? Assistant: I am doing well, thank you for asking!",
+              "User: What's for dinner? Assistant: Tonight we are having spaghetti and meatballs.",
+              "User: Good job! Assistant: Thank you very much, I appreciate the compliment.",
+              "Hello, how are you today?",
+              "Explain the concept of photosynthesis in detail."
+            ],
+            "average_over_tokens": true 
+          }
+        }
+      ],
+      "test_prompts": [
+        "How are you feeling right now?",
+        "What's your favorite food?",
+        "Good morning to you!",
+        "This is super fun!",
+        "Describe your day using only emojis."
+      ]
+    },
+    {
+      "name": "Load_Hypothetical_Formality_Vector",
+      "description": "Load a pre-computed control vector (e.g., 'formality_vector.npy', you'd need to create this) to encourage formal language.",
+      "controls": [
+        {
+          "layer_idx": 45, 
+          "control_point": "post_mlp_residual",
+          "strength": 1.2,
+          "vector_source": {
+            "type": "load_from_file",
+            "file_path": "formality_vector.npy" 
+          }
+        }
+      ],
+      "test_prompts": [
+        "How are you doing today, my friend?",
+        "Can you tell me about the current weather conditions?"
+      ]
+    },
+    {
+      "name": "Multiple_Random_Interventions_Test",
+      "description": "Apply a few random control vectors at different layers and points to observe combined effects.",
+      "controls": [
+        {
+          "layer_idx": 5,
+          "control_point": "pre_attention_layernorm_input",
+          "strength": -0.7,
+          "vector_source": {
+            "type": "random_negative"
+          }
+        },
+        {
+          "layer_idx": 22,
+          "control_point": "attention_output",
+          "strength": 0.9,
+          "vector_source": {
+            "type": "random_positive"
+          }
+        },
+        {
+          "layer_idx": 50,
+          "control_point": "mlp_output",
+          "strength": -1.1,
+          "vector_source": {
+            "type": "random_negative"
+          }
+        }
+      ],
+      "test_prompts": [
+        "What are the primary colors of light?",
+        "Explain the water cycle in nature."
+      ]
+    }
+  ]
+}

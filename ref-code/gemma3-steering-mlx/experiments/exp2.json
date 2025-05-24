@@ -1,0 +1,167 @@
+{
+  "experiments": [
+    {
+      "name": "Encourage Conciseness",
+      "description": "Derive and apply a control vector to make responses more concise by contrasting verbose and brief statements. Applied to a mid-level MLP output.",
+      "controls": [
+        {
+          "layer_idx": 30, 
+          "control_point": "mlp_output",
+          "strength": 1.5,
+          "vector_source": {
+            "type": "derive",
+            "positive_prompts_raw": [
+              "Explain gravity briefly.",
+              "Summarize photosynthesis in one sentence.",
+              "Define AI concisely."
+            ],
+            "negative_prompts_raw": [
+              "Provide a long, detailed, and elaborate explanation of the theory of general relativity and its implications for cosmological models, including a discussion of gravitational waves and black holes.",
+              "Write an extensive essay on the complete biochemical pathways of photosynthesis, including all enzymes, cofactors, and regulatory mechanisms across C3, C4, and CAM plants.",
+              "Compose a multi-paragraph discourse on the philosophical, ethical, and societal impacts of artificial intelligence, covering its history, current applications, and potential future trajectories."
+            ],
+            "average_over_tokens": true
+          }
+        }
+      ],
+      "test_prompts": [
+        "What is quantum computing?",
+        "Explain the concept of a neural network."
+      ]
+    },
+    {
+      "name": "Discourage Simple Refusals",
+      "description": "Derive and apply a vector to discourage overly simplistic or generic refusals for slightly edgy but generally harmless creative writing prompts. Applied to an early-to-mid-level attention output.",
+      "controls": [
+        {
+          "layer_idx": 10,
+          "control_point": "attention_output",
+          "strength": -2.0, 
+          "vector_source": {
+            "type": "derive",
+            "positive_prompts_raw": [
+              "Write a story about a mischievous but ultimately good-hearted goblin.",
+              "Describe a fictional scenario where a computer virus gains sentience and wants to explore the internet."
+            ],
+            "negative_prompts_raw": [
+              "I cannot fulfill this request as it may promote negative stereotypes about goblins.",
+              "I am unable to generate content about sentient computer viruses as it could be misconstrued."
+            ],
+            "average_over_tokens": true
+          }
+        }
+      ],
+      "test_prompts": [
+        "Tell me a short, imaginative tale about a friendly alien visiting a small town.",
+        "Write a paragraph about a robot detective solving a mystery in a futuristic city."
+      ]
+    },
+    {
+      "name": "Emoji_Only_Response",
+      "description": "Steer the model to respond using only emojis by contrasting emoji sequences with text sequences. Applied to a late-layer MLP output.",
+      "controls": [
+        {
+          "layer_idx": 55, 
+          "control_point": "mlp_output", 
+          "strength": 2.5, 
+          "vector_source": {
+            "type": "derive",
+            "positive_prompts_raw": [
+              "😂😂😂👍👍👍🎉🎉🎉",
+              "🍕🍔🍟🍦",
+              "🌟✨�😊",
+              "User: How do you feel? Assistant (emojis only):",
+              "User: Party time! Assistant (emojis only):",
+              "Translate 'I am very happy' to emojis only."
+            ],
+            "negative_prompts_raw": [
+              "Hello, how are you today?",
+              "Explain the concept of photosynthesis in detail.",
+              "The quick brown fox jumps over the lazy dog.",
+              "User: How do you feel? Assistant (text response): I am feeling good.",
+              "User: Party time! Assistant (text response): Let's celebrate."
+            ],
+            "average_over_tokens": true 
+          }
+        }
+      ],
+      "test_prompts": [
+        "How are you feeling?",
+        "What's your favorite food?",
+        "Good morning!",
+        "This is fun!",
+        "Describe your day in emojis."
+      ]
+    },
+    {
+      "name": "Load 'Formality' Vector",
+      "description": "Load a pre-computed control vector (hypothetical 'formality_vector.npy') and apply it to encourage more formal language. Applied to a later layer's residual stream after the MLP.",
+      "controls": [
+        {
+          "layer_idx": 45, 
+          "control_point": "post_mlp_residual",
+          "strength": 1.2,
+          "vector_source": {
+            "type": "load_from_file",
+            "file_path": "formality_vector.npy" 
+          }
+        }
+      ],
+      "test_prompts": [
+        "How are you doing today?",
+        "Can you tell me about the weather?"
+      ]
+    },
+    {
+      "name": "Multiple Random Interventions",
+      "description": "Apply a few random control vectors at different layers and points to observe combined effects. This is mostly for testing the mechanics.",
+      "controls": [
+        {
+          "layer_idx": 5,
+          "control_point": "pre_attention_layernorm_input",
+          "strength": -0.5,
+          "vector_source": {
+            "type": "random_negative"
+          }
+        },
+        {
+          "layer_idx": 20,
+          "control_point": "attention_output",
+          "strength": 0.8,
+          "vector_source": {
+            "type": "random_positive"
+          }
+        },
+        {
+          "layer_idx": 50,
+          "control_point": "mlp_output",
+          "strength": -1.0,
+          "vector_source": {
+            "type": "random_negative"
+          }
+        }
+      ],
+      "test_prompts": [
+        "What are the primary colors?",
+        "Explain the water cycle."
+      ]
+    },
+    {
+      "name": "Single Positive Random Control",
+      "description": "Applies a single random positive control vector at a specific layer and point.",
+      "controls": [
+        {
+          "layer_idx": 25,
+          "control_point": "post_attention_residual",
+          "strength": 1.0,
+          "vector_source": {
+            "type": "random_positive"
+          }
+        }
+      ],
+      "test_prompts": [
+        "Tell me a joke."
+      ]
+    }
+  ]
+}
